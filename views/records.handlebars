@@ -1,0 +1,30 @@
+<div class="row">
+    <div class="twelve columns box">
+        <h2>
+            Phone Bill Records:
+        </h2>
+
+        <table>
+
+
+
+            <tr>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Timestamp</th>
+            </tr>
+            {{#each billArray}}
+            <tr>
+                <td>{{Type}}</td>
+                <td>R{{Cost}}</td>
+                <td>{{updatedDate}} </td>
+            </tr>
+            {{/each}}
+        </table>
+    <hr>
+        <form action="/" method="GET">
+            <button class="button-primary" type="submit" name="button">Back</button>
+        </form>
+
+    </div>
+</div>
