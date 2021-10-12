@@ -1,148 +1,160 @@
-"use strict";
+module.exports = function CalculateBillsSettings(){
+    var callCost = 0.00;
+    var smsCost = 0.00;
+    var levelWarning = 0.00;
+    var levelCritical = 0.00;
+    var callCostTotal = 0.00;
+    var smsCostTotal = 0.00;
+    
+    var actionList = [];
 
-//Exporting the Moment modules
-const Moment = require('moment');
-let moment = Moment();
-module.exports = function () {
-    let callsTotalBill = 0;
-    let smsTotalBill = 0;
-    let totalCostbill = 0;
-
-    let warningVariable = 0;
-    let criticalVariable = 0;
-    let smsCostVariable = 0;
-    let callCostVariable = 0;
-
-    let color = '';
-
-    let billArray = [];
-
-    function setCallCost(itemCall) {
-        callCostVariable = parseFloat(itemCall);
-    }
-
-    function setSmsCost(itemSmS) {
-        smsCostVariable = parseFloat(itemSmS);
-    }
-
-    function setCriticalWarning(itemCritical) {
-        criticalVariable = parseFloat(itemCritical);
-    }
-
-    function setWarning(warning) {
-        warningVariable = parseFloat(warning);
-    }
-
-    function addTotal(billItems) {
-        // update the correct total
-
-
-        if (totalCostbill < criticalVariable) 
-        {
-
-            let bill = {
-                Type: billItems,
-                TimeStamp: new Date()
+    function calculateTotalBills(checkedBill) {
+        var overallTotal = getOverallTotalSettings();
+       // console.log(overallTotal);
+        if (overallTotal < levelCritical){
+            if (checkedBill === 'call'){
+                callCostTotal += callCost;
             }
-
-            if (billItems === "call") {
-                callsTotalBill += callCostVariable;
-                bill.Cost = callCostVariable.toFixed(2);
-
-            } else if (billItems === "sms") {
-                smsTotalBill += smsCostVariable;
-                bill.Cost = smsCostVariable.toFixed(2);
+            else if(checkedBill === 'sms'){
+                smsCostTotal += smsCost;
             }
-            billArray.unshift(bill);
-        }
-
-    }
-
-
-    function colorChangeRadio() {
-        if (totalCostbill > criticalVariable) {
-            color = 'danger';
-            return color;
-
-        } else if (totalCostbill > warningVariable) {
-            color = 'warning';
-            return color;
         }
     }
 
-
-    function callTotal() {
-        return callsTotalBill.toFixed(2);
+    function setCallCost(callCostParam){
+        var  callCostSettingsAmount = 0;
+        
+        if (callCostParam !== ''){
+            callCostSettingsAmount = parseFloat(callCostParam);
+        }
+        callCost = callCostSettingsAmount;
     }
 
-    function smsTotal() {
-        return smsTotalBill.toFixed(2);
+    function setSmsCost(smsCostParam) {
+        var smsCostSettingsAmount = 0;
+        if (smsCostParam !== ''){
+            smsCostSettingsAmount = parseFloat(smsCostParam);
+        }
+       
+        smsCost = smsCostSettingsAmount;
     }
 
-    function getCallCost() {
-        return callCostVariable.toFixed(2);
+    function setWarningLevel(warningLevelCost){
+        var warningLevelAmount = 0;
+        if (warningLevelCost !== ''){
+            warningLevelAmount = parseFloat(warningLevelCost);
+        }
+        levelWarning = warningLevelAmount;
     }
 
-    function getSMSCost() {
-        return smsCostVariable.toFixed(2);
+    function setCriticalLevel(criticalLeveCost) {
+        var criticalLevelAmount = 0;
+        if (criticalLeveCost !== '') {
+            criticalLevelAmount = parseFloat(criticalLeveCost);
+        }
+        levelCritical = criticalLevelAmount;
     }
 
-    function getCriticalValue() {
-        return criticalVariable.toFixed(2);
-    }
-
-    function getWarningValue() {
-        return warningVariable.toFixed(2);
-    }
-
-    function getBillRecords(type) {
-        if (type === "" || type === undefined) {
-            return billArray;
-        } else {
-
-            return billArray.filter(current => current.Type === type);
+    function recordAction(action){
+        var cost = 0;
+        if (action === 'call'){
+            cost = callCost;
+        }else if (action === 'sms'){
+            cost = smsCost;
         }
 
+        if (action === 'call' || action === 'sms') {
+            actionList.push({
+                type: action,
+                cost,
+                timeframe: new Date()
+            });
+        }
     }
 
-    function total() {
-        totalCostbill = callsTotalBill + smsTotalBill;
-        return totalCostbill.toFixed(2);
+    function action(){
+        return actionList;
     }
 
-    // function resetValues (){
-    //     resetPriveValues = 
-    //     {
-    //         callsTotalBill : 0.00,
-    //         smsTotalBill : 0.00,
-    //         totalCostbill :0.00  
-    //     }
+    function actionsFor(type){
+        const filteredActions = [];
 
-    // }
+        // loop through all the entries in the action list 
+        for (let index = 0; index < actionList.length; index++) {
+            const action = actionList[index];
+            // check this is the type we are doing the total for 
+            if (action.type === type) {
+                // add the action to the list
+                filteredActions.push(action);
+            }
+        }
 
+        return filteredActions;
+
+        // return actionList.filter((action) => action.type === type);
+    }
+
+    function getCallCost(){
+        return callCost;
+    }
+
+    function getSmsCost() {
+        return smsCost;
+    }
+
+    function getWarningLevel(){
+        return levelWarning;
+    }
+
+    function getCriticalLevel(){
+        return levelCritical;
+    }
+
+    function getSettedTotal() {
+        return getCallCost() + getSmsCost();
+    }
+    function getClassNameLevel(totalOverall){
+        // console.log(totalOverall);
+        // console.log(levelCritical);
+        if (totalOverall === 0.00) {
+            return 'totalSettings';
+        }
+        if (totalOverall >= levelCritical){
+            return 'danger';
+        }else if (totalOverall >= levelWarning){
+            return 'warning';
+        } 
+    }
+
+    function getCallCostTotal() {
+        return callCostTotal;
+    }
+
+    function getSmsCostTotal() {
+        return smsCostTotal;
+    }
+
+    function getOverallTotalSettings() {
+        return getCallCostTotal() + getSmsCostTotal();
+    }
 
     return {
-
-        calls: setCallCost,
-        sms: setSmsCost,
-        critical: setCriticalWarning,
-        warning: setWarning,
-
-
-        sumCall: callTotal,
-        sumSms: smsTotal,
-        getWarning: getWarningValue,
-        getCritical: getCriticalValue,
-
-
-        getCallPrice: getCallCost,
-        getSMSPrice: getSMSCost,
-        sumTotal: total,
-        sumBill: addTotal,
-        colors: colorChangeRadio,
-        getBill: getBillRecords
-
-        // getResetValues: resetPriveValues
-
+        calculateTotalBills,
+        getCallCostTotal,
+        getSmsCostTotal,
+        getOverallTotalSettings,
+        getClassNameLevel,
+        setCallCost,
+        setSmsCost,
+        setWarningLevel,
+        setCriticalLevel,
+        getSettedTotal,
+        getCallCost,
+        getSmsCost,
+        getWarningLevel,
+        getCriticalLevel,
+        recordAction,
+        action,
+        actionsFor
     }
 }
